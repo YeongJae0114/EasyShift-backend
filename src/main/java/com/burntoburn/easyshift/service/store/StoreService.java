@@ -5,7 +5,7 @@ import com.burntoburn.easyshift.dto.store.use.*;
 import java.util.UUID;
 
 public interface StoreService {
-    StoreCreateResponse createStore(StoreCreateRequest request);
+    StoreCreateResponse createStore(Long userId, StoreCreateRequest request);
 
     void updateStore(Long storeId, StoreUpdateRequest request);
 

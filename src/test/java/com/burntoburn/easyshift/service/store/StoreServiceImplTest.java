@@ -55,6 +55,13 @@ class StoreServiceImplTest {
     @DisplayName("매장 생성 성공 테스트")
     void testCreateStoreSuccess() {
         // given
+        Long userId = 1L;
+        User mockUser = User.builder()
+                .id(userId)
+                .name("MockUser")
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
         StoreCreateRequest request = new StoreCreateRequest();
         ReflectionTestUtils.setField(request, "storeName", "Test Store");
         ReflectionTestUtils.setField(request, "description", "Test Description");
@@ -69,7 +76,7 @@ class StoreServiceImplTest {
         when(storeRepository.save(any(Store.class))).thenReturn(savedStore);
 
         // when
-        StoreCreateResponse response = storeService.createStore(request);
+        StoreCreateResponse response = storeService.createStore(userId, request);
 
         // then
         assertNotNull(response);
