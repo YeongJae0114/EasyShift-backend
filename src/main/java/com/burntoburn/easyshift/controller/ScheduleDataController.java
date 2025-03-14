@@ -1,5 +1,6 @@
 package com.burntoburn.easyshift.controller;
 
+import com.burntoburn.easyshift.common.response.ApiResponse;
 import com.burntoburn.easyshift.dto.schedule.res.ScheduleDetailDTO;
 import com.burntoburn.easyshift.entity.leave.ApprovalStatus;
 import com.burntoburn.easyshift.entity.leave.LeaveRequest;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 public class ScheduleDataController {
 
     @GetMapping("/data/schedule")
-    public ScheduleDetailDTO getScheduleData() {
+    public ApiResponse<ScheduleDetailDTO> getScheduleData() {
         // 1. 스케줄 객체 생성
         Schedule schedule = Schedule.builder()
                 .id(1L)
@@ -340,6 +341,6 @@ public class ScheduleDataController {
 
         // 8. 배정 결과 출력
         ScheduleDetailDTO scheduleDetailDTO = ScheduleDetailDTO.fromEntity(schedule.getId(), schedule.getScheduleName(), shiftTemplates, shifts);
-        return scheduleDetailDTO;
+        return ApiResponse.success(scheduleDetailDTO);
     }
 }
