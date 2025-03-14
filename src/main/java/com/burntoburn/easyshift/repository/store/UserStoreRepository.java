@@ -19,4 +19,6 @@ public interface UserStoreRepository extends JpaRepository<UserStore, Long> {
 
     @Query("SELECT u FROM UserStore us JOIN us.user u WHERE us.store.id = :storeId")
     List<User> findUsersByStoreId(@Param("storeId") Long storeId);
+
+    List<UserStore> findAllByStore(Store store);
 }

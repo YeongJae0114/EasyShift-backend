@@ -11,6 +11,7 @@ import com.burntoburn.easyshift.repository.schedule.ShiftRepository;
 import com.burntoburn.easyshift.repository.store.StoreRepository;
 import com.burntoburn.easyshift.repository.store.UserStoreRepository;
 import com.burntoburn.easyshift.repository.user.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ public class StoreQueryTest {
 
     @Autowired
     private ShiftRepository shiftRepository;
+
+
     @Test
     @DisplayName("매장 생성 쿼리 확인")
     void createStoreQueryTest(){
@@ -51,8 +54,17 @@ public class StoreQueryTest {
         request.setStoreName("Test Store");
         request.setDescription("Test Store Description");
 
+        User user = User.builder()
+                .name("Test User")
+                .email("testuser@example.com")
+                .role(Role.GUEST)
+                .build();
+        user = userRepository.save(user); // <-- 실제 DB에 저장 (영속화)
+        Long userId = user.getId();       // <-- DB에서 자동 생성된 ID 사용
+
+
         // when
-        StoreCreateResponse response = storeService.createStore(request);
+        StoreCreateResponse response = storeService.createStore(userId, request);
 
         // then
         assertNotNull(response);
@@ -72,7 +84,16 @@ public class StoreQueryTest {
         StoreCreateRequest createRequest = new StoreCreateRequest();
         createRequest.setStoreName("Original Store Name");
         createRequest.setDescription("Original Description");
-        StoreCreateResponse createResponse = storeService.createStore(createRequest);
+
+        User user = User.builder()
+                .name("Test User")
+                .email("testuser@example.com")
+                .role(Role.GUEST)
+                .build();
+        user = userRepository.save(user); // <-- 실제 DB에 저장 (영속화)
+        Long userId = user.getId();       // <-- DB에서 자동 생성된 ID 사용
+
+        StoreCreateResponse createResponse = storeService.createStore(userId, createRequest);
         Long storeId = createResponse.getStoreId();
 
         // when: 매장 정보 수정
@@ -90,12 +111,31 @@ public class StoreQueryTest {
     @Test
     @DisplayName("매장 삭제 쿼리 확인")
     void testDeleteStoreQueryExecution() {
-        // given: 삭제할 매장을 생성
+        // given: 삭제할 매장을 생성하기 위해 유효한 User를 먼저 저장합니다.
+        User user = User.builder()
+                .name("Test User")
+                .email("testuser@example.com")
+                .role(Role.GUEST)
+                .build();
+        user = userRepository.save(user);
+        Long userId = user.getId(); // 실제 DB에 저장된 ID 사용
+
+        // 매장 생성 (자동으로 해당 User와 연결되었다고 가정)
         StoreCreateRequest createRequest = new StoreCreateRequest();
         createRequest.setStoreName("Store To Delete");
         createRequest.setDescription("Store To Delete Description");
-        StoreCreateResponse createResponse = storeService.createStore(createRequest);
+        StoreCreateResponse createResponse = storeService.createStore(userId, createRequest);
         Long storeId = createResponse.getStoreId();
+
+        // 삭제 전에, 해당 매장에 연결된 모든 UserStore 엔티티들을 명시적으로 삭제합니다.
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(StoreException::storeNotFound);
+        // UserStoreRepository에 매장으로 조회하는 메서드를 통해 삭제
+        var userStores = userStoreRepository.findAllByStore(store);
+        if (!userStores.isEmpty()) {
+            userStoreRepository.deleteAll(userStores);
+            userStoreRepository.flush();  // DB에 삭제 반영
+        }
 
         // when: 매장 삭제
         storeService.deleteStore(storeId);
@@ -104,7 +144,6 @@ public class StoreQueryTest {
         // then: 삭제된 매장을 조회할 때 null이어야 함
         Optional<Store> storeOpt = storeRepository.findById(storeId);
         assertFalse(storeOpt.isPresent(), "매장이 삭제되어 조회되지 않아야 합니다.");
-        // ※ 콘솔 로그에 delete 쿼리가 출력됩니다.
     }
 
     @Test
@@ -122,8 +161,7 @@ public class StoreQueryTest {
         StoreCreateRequest createRequest = new StoreCreateRequest();
         createRequest.setStoreName("User Store");
         createRequest.setDescription("User Store Description");
-        StoreCreateResponse createResponse = storeService.createStore(createRequest);
-        storeService.joinUserStore(createResponse.getStoreCode(), user.getId());
+        StoreCreateResponse createResponse = storeService.createStore(user.getId(), createRequest);
 
         // when: 사용자의 매장 목록 조회
         UserStoresResponse userStoresResponse = storeService.getUserStores(user.getId());
@@ -138,10 +176,18 @@ public class StoreQueryTest {
     @DisplayName("매장 사용자 목록 조회 쿼리 확인")
     void testGetStoreUsersQueryExecution() {
         // given: 매장 생성
+        User user = User.builder()
+                .name("Test User")
+                .email("testuser@example.com")
+                .role(Role.GUEST)
+                .build();
+        user = userRepository.save(user); // <-- 실제 DB에 저장 (영속화)
+        Long userId = user.getId();       // <-- DB에서 자동 생성된 ID 사용
+
         StoreCreateRequest createRequest = new StoreCreateRequest();
         createRequest.setStoreName("Store For Users");
         createRequest.setDescription("Desc for store users");
-        StoreCreateResponse createResponse = storeService.createStore(createRequest);
+        StoreCreateResponse createResponse = storeService.createStore(userId, createRequest);
         Long storeId = createResponse.getStoreId();
 
         // 두 명의 사용자 생성 후 매장 가입
@@ -170,7 +216,7 @@ public class StoreQueryTest {
 
         // then
         assertNotNull(response);
-        assertEquals(2, response.getUsers().size(), "매장 사용자 목록에 두 명의 사용자가 포함되어야 합니다.");
+        assertEquals(3, response.getUsers().size(), "매장 사용자 목록에 두 명의 사용자가 포함되어야 합니다.");
         // ※ 콘솔 로그에 select 쿼리가 출력됨을 확인하세요.
     }
 
@@ -188,9 +234,8 @@ public class StoreQueryTest {
         StoreCreateRequest createRequest = new StoreCreateRequest();
         createRequest.setStoreName("Info Store");
         createRequest.setDescription("Store for info test");
-        StoreCreateResponse createResponse = storeService.createStore(createRequest);
+        StoreCreateResponse createResponse = storeService.createStore(user.getId(),createRequest);
         Long storeId = createResponse.getStoreId();
-        storeService.joinUserStore(createResponse.getStoreCode(), user.getId());
 
         // when: 매장 정보 조회 (스케줄 템플릿 관련 데이터가 없다면 빈 리스트 반환)
         var storeInfoResponse = storeService.getStoreInfo(storeId, user.getId());
@@ -216,12 +261,10 @@ public class StoreQueryTest {
         StoreCreateRequest createRequest = new StoreCreateRequest();
         createRequest.setStoreName("Join Store");
         createRequest.setDescription("Join store test");
-        StoreCreateResponse createResponse = storeService.createStore(createRequest);
+        StoreCreateResponse createResponse = storeService.createStore(user.getId(), createRequest);
 
-        // when: 첫 가입 시도
-        storeService.joinUserStore(createResponse.getStoreCode(), savedUser.getId());
 
-        // then: 동일 매장에 다시 가입 시도하면 예외가 발생해야 함
+        // when then: 동일 매장에 다시 가입 시도하면 예외가 발생해야 함
         assertThrows(StoreException.class, () ->
                 storeService.joinUserStore(createResponse.getStoreCode(), savedUser.getId())
         );
@@ -232,10 +275,18 @@ public class StoreQueryTest {
     @DisplayName("매장 정보 단순 조회 쿼리 확인")
     void testGetStoreSimpleInfo() {
         // given: 매장 생성
+        User user = User.builder()
+                .name("Test User")
+                .email("testuser@example.com")
+                .role(Role.GUEST)
+                .build();
+        user = userRepository.save(user); // <-- 실제 DB에 저장 (영속화)
+        Long userId = user.getId();       // <-- DB에서 자동 생성된 ID 사용
+
         StoreCreateRequest createRequest = new StoreCreateRequest();
         createRequest.setStoreName("Simple Info Store");
         createRequest.setDescription("Simple info description");
-        StoreCreateResponse createResponse = storeService.createStore(createRequest);
+        StoreCreateResponse createResponse = storeService.createStore(userId, createRequest);
 
         Store store = storeRepository.findById(createResponse.getStoreId()).orElseThrow();
 

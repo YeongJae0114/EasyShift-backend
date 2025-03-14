@@ -25,8 +25,8 @@ public class StoreController {
      * 매장 생성 API
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<StoreCreateResponse>> createStore(@Valid @RequestBody StoreCreateRequest request) {
-        StoreCreateResponse response = storeService.createStore(request);
+    public ResponseEntity<ApiResponse<StoreCreateResponse>> createStore(@RequestParam Long userId, @Valid @RequestBody StoreCreateRequest request) {
+        StoreCreateResponse response = storeService.createStore(userId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -108,7 +108,7 @@ public class StoreController {
     /**
      * 매장 입장 API
      */
-    @GetMapping("/join")
+    @PostMapping("/join")
     public ResponseEntity<ApiResponse<Void>> getStore(@RequestParam UUID storeCode) {
         // UserId는 spring security의 @AuthenticationPrincipal로 받아올 수 있음
         // Long userId = userDetails.getUserId();

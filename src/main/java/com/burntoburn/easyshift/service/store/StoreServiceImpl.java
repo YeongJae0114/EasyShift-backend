@@ -2,7 +2,6 @@ package com.burntoburn.easyshift.service.store;
 
 import com.burntoburn.easyshift.common.util.DateUtil;
 import com.burntoburn.easyshift.dto.store.use.*;
-import com.burntoburn.easyshift.dto.user.UserDTO;
 import com.burntoburn.easyshift.entity.schedule.Shift;
 import com.burntoburn.easyshift.entity.store.Store;
 import com.burntoburn.easyshift.entity.store.UserStore;
@@ -38,11 +37,28 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     @Transactional
-    public StoreCreateResponse createStore(StoreCreateRequest request) {
-        Store store = StoreCreateRequest.toEntity(request.getStoreName(), request.getDescription());
+    public StoreCreateResponse createStore(Long userId, StoreCreateRequest request) {
+        // 1) 유저 찾기 (매장을 만든 사람)
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserException::userNotFound);
 
+        // 2) 새 매장 엔티티 생성
+        Store store = StoreCreateRequest.toEntity(request.getStoreName(), request.getDescription());
         Store savedStore = storeRepository.save(store);
-        return new StoreCreateResponse(savedStore.getId(), savedStore.getStoreName(), savedStore.getStoreCode());
+
+        // 3) UserStore 엔티티로 유저-매장 관계 생성
+        UserStore userStore = UserStore.builder()
+                .user(user)
+                .store(savedStore)
+                .build();
+        userStoreRepository.save(userStore);
+
+        // 4) 응답 DTO 리턴
+        return new StoreCreateResponse(
+                savedStore.getId(),
+                savedStore.getStoreName(),
+                savedStore.getStoreCode()
+        );
     }
 
     @Override
@@ -119,7 +135,7 @@ public class StoreServiceImpl implements StoreService {
         User user = userRepository.findById(userId).orElseThrow(UserException::userNotFound);
 
         boolean alreadyJoined = userStoreRepository.existsByUserIdAndStoreId(userId, store.getId());
-        if(alreadyJoined){
+        if (alreadyJoined) {
             throw StoreException.userAlreadyJoined();
         }
 
