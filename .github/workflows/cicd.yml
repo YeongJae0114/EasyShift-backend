@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     env:
-      IMAGE_NAME: codinggroot/easy-schedule
+      IMAGE_NAME: yeongjae0114/easy-schedule
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout repository
@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build
     env:
-      IMAGE_NAME: codinggroot/easy-schedule
+      IMAGE_NAME: yeongjae0114/easy-schedule
       DB_URL_PROD: ${{ secrets.DB_URL }}
       DB_URL_DEV: ${{ secrets.DB_URL_DEVELOP }}
     strategy:
