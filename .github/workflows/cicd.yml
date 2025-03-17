@@ -117,4 +117,4 @@ jobs:
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -e APPLICATION_OAUTH_CONFIG=$APPLICATION_OAUTH_CONFIG \
-              ${{ env.IMAGE_NAME }}:$TAG
+
