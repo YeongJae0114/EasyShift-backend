@@ -7,12 +7,14 @@ import com.burntoburn.easyshift.dto.schedule.res.ScheduleInfoResponse;
 import com.burntoburn.easyshift.dto.schedule.res.ScheduleResponse;
 import com.burntoburn.easyshift.dto.schedule.res.WorkerScheduleResponse;
 import com.burntoburn.easyshift.dto.store.SelectedScheduleTemplateDto;
+import com.burntoburn.easyshift.service.login.CustomUserDetails;
 import com.burntoburn.easyshift.service.schedule.ScheduleService;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,14 +44,14 @@ public class ScheduleController {
     /**
      * 특정 Worker의 특정 날짜 스케줄 조회 API
      * @param storeId 매장 ID
-     * @param userId 워커 ID
      * @param date 조회할 날짜
      * @return 해당 날짜의 Worker 스케줄 목록
      */
-    @GetMapping("/stores/{storeId}/workers/{userId}/schedules")
+    @GetMapping("/stores/{storeId}/workers/schedules")
     public ResponseEntity<ApiResponse<WorkerScheduleResponse>> getWorkerSchedule(@PathVariable Long storeId,
-                                                                                 @PathVariable Long userId,
+                                                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                                                  @RequestParam String date) {
+        Long userId = userDetails.getUser().getId();
         WorkerScheduleResponse response = scheduleService.getSchedulesByWorker(storeId, userId, date);
         return ResponseEntity.ok(ApiResponse.success(response));
     }

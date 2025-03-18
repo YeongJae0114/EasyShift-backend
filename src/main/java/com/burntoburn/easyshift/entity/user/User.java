@@ -17,8 +17,10 @@ public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE) // id는 Builder에서 설정 불가
-    @Column(name = "Id")
     private Long id;
+
+    @NonNull
+    private String password;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -34,6 +36,8 @@ public class User extends BaseEntity {
     private Role role = Role.GUEST; // GUEST, WORKER, ADMINISTRATOR
 
     private String avatarUrl;
+
+
 
     public User update(String newEmail) {
         this.email = newEmail;
