@@ -102,9 +102,6 @@ public class ScheduleServiceImp implements ScheduleService {
         YearMonth scheduleMonth = YearMonth.parse(date, DateTimeFormatter.ofPattern("yyyy-MM"));
 
         List<Schedule> workerSchedules = scheduleRepository.findWorkerSchedules(storeId, scheduleMonth, userId);
-        if (workerSchedules.isEmpty()) {
-            throw ScheduleException.scheduleNotFound();
-        }
 
         Store store = workerSchedules.getFirst().getStore(); // 첫 번째 스케줄에서 store 가져오기
 

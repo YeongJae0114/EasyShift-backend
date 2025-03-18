@@ -2,10 +2,11 @@ package com.burntoburn.easyshift.entity.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 
 @Getter
 @RequiredArgsConstructor
-public enum Role {
+public enum Role implements GrantedAuthority {
 
     GUEST("GUEST"),
     WORKER("USER"),
@@ -20,5 +21,10 @@ public enum Role {
             }
         }
         return null;
+    }
+
+    @Override
+    public String getAuthority() {
+        return "ROLE_" + this.name(); // "ROLE_GUEST", "ROLE_WORKER", "ROLE_ADMINISTRATOR"
     }
 }
