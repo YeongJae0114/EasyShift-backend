@@ -48,6 +48,11 @@ jobs:
       IMAGE_NAME: zerojae175/easy-schedule
       DB_URL_DEV: ${{ secrets.DB_URL_DEVELOP }}
     steps:
+      - name: Decode SSH Key and Set Up SSH
+        run: |
+          echo "${{ secrets.SSH_KEY }}" | base64 --decode > /tmp/ssh_key.pem
+          chmod 600 /tmp/ssh_key.pem
+
       - name: Deploy to AWS EC2 (develop)
         uses: appleboy/ssh-action@v1.2.0
         with:
