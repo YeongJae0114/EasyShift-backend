@@ -57,7 +57,6 @@ jobs:
           script: |
             TAG="dev_${{ github.sha }}"
             DB_URL="${{ env.DB_URL_DEV }}"
-            APPLICATION_OAUTH_CONFIG="${{ secrets.APPLICATION_OAUTH_CONFIG_DEV }}"
 
             echo "Pulling image: ${{ env.IMAGE_NAME }}:$TAG"
             docker pull ${{ env.IMAGE_NAME }}:$TAG
@@ -77,7 +76,6 @@ jobs:
               -e DB_DIALECT="${{ secrets.DB_DIALECT }}" \
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -e APPLICATION_OAUTH_CONFIG=$APPLICATION_OAUTH_CONFIG \
               ${{ env.IMAGE_NAME }}:$TAG
 
             echo "Deployment to AWS EC2 (develop) completed!"
