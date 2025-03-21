@@ -6,7 +6,7 @@ import com.burntoburn.easyshift.entity.user.User;
 import com.burntoburn.easyshift.service.login.UserService;
 import com.burntoburn.easyshift.service.login.dto.LoginRequest;
 import com.burntoburn.easyshift.service.login.dto.SignUpRequest;
-import com.burntoburn.easyshift.session.SessionService;
+import com.burntoburn.easyshift.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

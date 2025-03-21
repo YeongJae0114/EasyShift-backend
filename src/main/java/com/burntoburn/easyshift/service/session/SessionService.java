@@ -1,4 +1,4 @@
-package com.burntoburn.easyshift.session;
+package com.burntoburn.easyshift.service.session;
 
 import jakarta.servlet.http.HttpSession;
 
