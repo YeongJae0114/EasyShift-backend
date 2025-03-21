@@ -1,8 +1,8 @@
-package com.burntoburn.easyshift.session.imp;
+package com.burntoburn.easyshift.service.session.imp;
 
 import com.burntoburn.easyshift.entity.user.User;
 import com.burntoburn.easyshift.service.login.CustomUserDetails;
-import com.burntoburn.easyshift.session.SessionService;
+import com.burntoburn.easyshift.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
