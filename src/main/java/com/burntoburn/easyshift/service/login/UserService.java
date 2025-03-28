@@ -9,14 +9,13 @@ import com.burntoburn.easyshift.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final NoOpPasswordEncoder passwordEncoder;
     private final SessionService sessionService;
 
     public User signup(SignUpRequest signUpRequest){
