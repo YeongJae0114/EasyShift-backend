@@ -103,6 +103,13 @@ public class ScheduleServiceImp implements ScheduleService {
 
         List<Schedule> workerSchedules = scheduleRepository.findWorkerSchedules(storeId, scheduleMonth, userId);
 
+        if (workerSchedules.isEmpty()) {
+            Store store = storeRepository.findById(storeId)
+                    .orElseThrow(StoreException::storeNotFound);
+
+            return WorkerScheduleResponse.fromEntity(store, List.of(), Map.of());
+        }
+
         Store store = workerSchedules.getFirst().getStore(); // 첫 번째 스케줄에서 store 가져오기
 
         Map<Long, String> scheduleIdToTemplateNameMap = getScheduleIdToTemplateNameMap(workerSchedules);
@@ -119,12 +126,9 @@ public class ScheduleServiceImp implements ScheduleService {
 
         List<Schedule> schedules = scheduleRepository.findSchedulesWithTemplate(scheduleTemplateId);
 
-
         List<Long> scheduleIds = schedules.stream().map(Schedule::getId).toList();
 
         List<Shift> shifts = shiftRepository.findShiftsByScheduleIdWithUser(scheduleIds, monday, endDate);
-
-
 
         ScheduleTemplate scheduleTemplate = scheduleTemplateRepository
                 .findScheduleTemplateWithShiftsById(schedules.get(0).getScheduleTemplateId())
