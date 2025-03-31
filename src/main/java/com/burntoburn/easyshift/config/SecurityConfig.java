@@ -26,7 +26,7 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_STATIC_RESOURCES = {
-            "/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**"
+            "/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**" , "/actuator/prometheus/**"
     };
     private static final String[] PUBLIC_API_ENDPOINTS = {
             "/api/auth/**", "/api/public/**", "/oauth2/**",
@@ -35,6 +35,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityContext(securityContext->securityContext.requireExplicitSave(false))
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 필요한 메서드만 허용
@@ -63,11 +64,13 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_API_ENDPOINTS).permitAll() // Swagger 허용
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요
                 )
-                // 세션 설정
+        // 세션 설정
                 .sessionManagement(session -> session
                         .maximumSessions(1) // 한 사용자당 하나의 세션만 유지
-                        .maxSessionsPreventsLogin(false) // 이전 세션 무효화
-                );
+                        .maxSessionsPreventsLogin(false) // 이전 세션 무효
+                )
+                .headers(headers -> headers.frameOptions(frame -> frame.disable())); // ✅ 여기가 정석
+
         return http.build();
     }
 

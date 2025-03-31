@@ -40,7 +40,9 @@ public class Store extends BaseEntity {
 
     @PrePersist
     private void initStoreCode() {
-        this.storeCode = UUID.randomUUID();
+        if (this.storeCode == null) {
+            this.storeCode = UUID.randomUUID();
+        }
     }
 
     // 매장 이름 변경하는 메서드
