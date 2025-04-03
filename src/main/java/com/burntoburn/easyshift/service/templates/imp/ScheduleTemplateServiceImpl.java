@@ -21,6 +21,7 @@ import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ScheduleTemplateServiceImpl implements ScheduleTemplateService {
     private final ScheduleTemplateRepository scheduleTemplateRepository;
     private final StoreRepository storeRepository;
@@ -41,7 +42,6 @@ public class ScheduleTemplateServiceImpl implements ScheduleTemplateService {
         return ScheduleTemplateResponse.fromEntity(scheduleTemplate);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public ScheduleTemplateWithShiftsResponse getAllScheduleTemplatesByStore(Long storeId) {
         // storeId가 존재하지 않으면 빈 리스트 반환
@@ -52,6 +52,7 @@ public class ScheduleTemplateServiceImpl implements ScheduleTemplateService {
 
 
     @Override
+    @Transactional
     public void deleteScheduleTemplate(Long scheduleTemplateId) {
         boolean exists = scheduleTemplateRepository.existsById(scheduleTemplateId);
         if (!exists){
