@@ -45,7 +45,7 @@ public class ScheduleTemplateServiceImpl implements ScheduleTemplateService {
     @Override
     public ScheduleTemplateWithShiftsResponse getAllScheduleTemplatesByStore(Long storeId) {
         // storeId가 존재하지 않으면 빈 리스트 반환
-        List<ScheduleTemplate> scheduleTemplateList = scheduleTemplateRepository.findAllByStoreId(storeId);
+        List<ScheduleTemplate> scheduleTemplateList = scheduleTemplateRepository.findAllWithShiftTemplatesByStoreId(storeId);
 
         return ScheduleTemplateWithShiftsResponse.fromEntities(scheduleTemplateList);
     }

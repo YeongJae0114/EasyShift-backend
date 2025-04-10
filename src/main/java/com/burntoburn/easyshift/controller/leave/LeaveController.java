@@ -5,8 +5,10 @@ import com.burntoburn.easyshift.dto.leave.req.LeaveRequestDto;
 import com.burntoburn.easyshift.dto.leave.res.LeaveCheckResponseDto;
 import com.burntoburn.easyshift.service.leave.LeaveRequestAdminService;
 import com.burntoburn.easyshift.service.leave.LeaveRequestWorkerService;
+import com.burntoburn.easyshift.service.login.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,10 +22,10 @@ public class LeaveController {
     @PostMapping("/{schedule_id}/leave-requests")
     public ResponseEntity<ApiResponse<Void>> createLeaveRequest(
             @PathVariable("schedule_id") Long schedule_id,
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody LeaveRequestDto dates
     ) {
-        leaveRequestWorkerService.createLeaveRequest(schedule_id, userId, dates);
+        leaveRequestWorkerService.createLeaveRequest(schedule_id, userDetails.getUser().getId(), dates);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
