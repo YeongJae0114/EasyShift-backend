@@ -1,8 +1,8 @@
-name: CI/CD Pipeline (develop only)
+name: CI/CD Pipeline (develop only - no cache)
 
 on:
   push:
-    branches: [develop]
+    branches: [develop, test]
   pull_request:
     branches: [develop]
   workflow_dispatch:
@@ -30,13 +30,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push development image
+      - name: Build and push development image (no cache)
         run: |
-          echo "Building development image..."
+          echo "Building development image (no cache)..."
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
-            --cache-from=type=registry,ref=${IMAGE_NAME}:cache \
-            --cache-to=type=registry,ref=${IMAGE_NAME}:cache,mode=max \
             -f Dockerfile \
             -t ${IMAGE_NAME}:dev_${IMAGE_TAG} \
             --push .
