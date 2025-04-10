@@ -4,7 +4,7 @@ set -e
 CONFIG_FILE="/app/config/application.properties"
 PROD_CONFIG_FILE="/app/config/application-production.properties"
 
-# Copy the production config file if it doesn't exist
+# spring.profiles.active 설정
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "spring.profiles.active=production" > "$CONFIG_FILE"
 elif grep -q "^spring.profiles.active" "$CONFIG_FILE"; then
@@ -13,7 +13,7 @@ else
   echo "spring.profiles.active=production" >> "$CONFIG_FILE"
 fi
 
-# Generate application-production.properties from env variables if provided
+# production 환경 설정 파일 생성
 if [ -n "$DB_URL" ] && [ -n "$SERVER_PORT" ] && [ -n "$DB_DIALECT" ] && [ -n "$DB_DRIVER" ] && [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ]; then
   cat > "$PROD_CONFIG_FILE" <<EOF
 server.port=$SERVER_PORT
@@ -23,10 +23,11 @@ spring.jpa.properties.hibernate.dialect=$DB_DIALECT
 spring.datasource.username=$DB_USERNAME
 spring.datasource.password=$DB_PASSWORD
 serverTimezone=UTC&characterEncoding=UTF-8
+server.forward-headers-strategy=native
 EOF
 else
   echo "Environment variables not set. Skipping production config generation."
 fi
 
-# Start the Spring Boot application with external config location
+# 애플리케이션 실행
 exec java -jar app.jar --spring.config.additional-location=file:/app/config/
