@@ -1,4 +1,4 @@
-name: CI/CD Pipeline (develop only - no buildx cache)
+name: CI/CD Pipeline (develop only - buildx, no cache, multi-platform)
 
 on:
   push:
@@ -21,63 +21,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image (no cache)
+      - name: Build and push development image (no cache, multi-platform)
         run: |
-          echo "Building image locally without cache..."
-          docker build --no-cache -t ${IMAGE_NAME}:dev_${IMAGE_TAG} .
-
-      - name: Push image to DockerHub
-        run: |
-          echo "Pushing image to DockerHub..."
-          docker push ${IMAGE_NAME}:dev_${IMAGE_TAG}
-
-  deploy:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-24.04
-    needs: build
-    env:
-      IMAGE_NAME: zerojae175/easy-schedule
-      DB_URL_DEV: ${{ secrets.DB_URL_DEVELOP }}
-    steps:
-      - name: Save SSH Key
-        run: |
-          echo "${{ secrets.SSH_KEY }}" > /tmp/ssh_key.pem
-          chmod 600 /tmp/ssh_key.pem
-
-      - name: Deploy to AWS EC2 (develop)
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            TAG="dev_${{ github.sha }}"
-            DB_URL="${{ env.DB_URL_DEV }}"
-
-            echo "Pulling image: ${{ env.IMAGE_NAME }}:$TAG"
-            docker pull ${{ env.IMAGE_NAME }}:$TAG
-
-            echo "Stopping and removing container: easyshift_dev"
-            docker stop easyshift_dev || true
-            docker rm easyshift_dev || true
-
-            echo "Starting new container..."
-            docker run -d --restart unless-stopped \
-              --name easyshift_dev \
-              -p 8081:${{ secrets.SERVER_PORT }} \
-              --add-host=host.docker.internal:host-gateway \
-              -e SERVER_PORT="${{ secrets.SERVER_PORT }}" \
-              -e DB_URL="$DB_URL" \
-              -e DB_DRIVER="${{ secrets.DB_DRIVER }}" \
-              -e DB_DIALECT="${{ secrets.DB_DIALECT }}" \
-              -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
-              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              ${{ env.IMAGE_NAME }}:$TAG
-
-            echo "Deployment to AWS EC2 (develop) completed!"
+          echo "Building image (no cache, amd64/arm64)..."
+          docker buildx build \
+            --no-cache \
+            --platform linux/amd64,linux/arm64 \
+            -f Dockerfile \
+            -t ${IMAGE_NAME}:dev_${IMAGE_TAG} \
+            --push .
