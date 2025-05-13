@@ -1,7 +1,7 @@
 # EasyShift : 교대 근무 매장 관리자를 위한 스케줄링 서비스
-
 > EasyShift는 관리자가 근무 스케줄을 자동 생성하고, 근로자가 손쉽게 신청·조정·확인할 수 있는 온라인 근무 스케줄 관리 서비스입니다
-아래는 주어진 기능 요약을 GitHub README에 잘 어울리는 **List 형식**으로 정리한 버전입니다:
+
+<img width="913" alt="image" src="https://github.com/user-attachments/assets/938a8ea6-e7d4-476d-9b48-cedc2c9f9760" />
 
 ## 🗂️ 주요 기능 요약
 * **스케줄 생성 및 관리**
@@ -36,7 +36,7 @@
   * 상태 관리: Context API + 커스텀 훅
   * 역할별 접근 제어 (근로자 / 매니저)
 * **Backend (Spring Boot)** : 역할 기반 인증/인가, 스케줄 자동화, 근무 교환 등 핵심 비즈니스 로직을 담당합니다.
-  * JWT + Redis 기반 인증
+  * JWT 기반 인증
   * JPA + MySQL 데이터 저장
   * 교대 알고리즘 적용
 * **Database (MySQL)**
